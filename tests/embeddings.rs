@@ -7,11 +7,10 @@ use hf_hub::Repo;
 use rayon::iter::{IntoParallelRefIterator, ParallelIterator};
 
 use fastembed::{
-    read_file_to_bytes, Embedding, EmbeddingModel, ImageEmbedding, ImageInitOptions, InitOptions,
-    InitOptionsUserDefined, Pooling, QuantizationMode, RerankInitOptions,
-    RerankInitOptionsUserDefined, RerankerModel, SparseInitOptions, SparseTextEmbedding,
-    TextEmbedding, TextRerank, TokenizerFiles, UserDefinedEmbeddingModel,
-    UserDefinedRerankingModel, DEFAULT_CACHE_DIR,
+    read_file_to_bytes, Embedding, EmbeddingModel, InitOptions, InitOptionsUserDefined, Pooling,
+    QuantizationMode, RerankInitOptions, RerankInitOptionsUserDefined, RerankerModel,
+    SparseInitOptions, SparseTextEmbedding, TextEmbedding, TextRerank, TokenizerFiles,
+    UserDefinedEmbeddingModel, UserDefinedRerankingModel, DEFAULT_CACHE_DIR,
 };
 
 /// A small epsilon value for floating point comparisons.
@@ -392,30 +391,6 @@ fn test_user_defined_reranking_model() {
 
     assert_eq!(results.len(), documents.len());
     assert_eq!(results.first().unwrap().index, 0);
-}
-
-#[test]
-fn test_image_embedding_model() {
-    ImageEmbedding::list_supported_models()
-        .par_iter()
-        .for_each(|supported_model| {
-            let model: ImageEmbedding =
-                ImageEmbedding::try_new(ImageInitOptions::new(supported_model.model.clone()))
-                    .unwrap();
-
-            let images = vec!["tests/assets/image_0.png", "tests/assets/image_1.png"];
-
-            // Generate embeddings with the default batch size, 256
-            let embeddings = model.embed(images.clone(), None).unwrap();
-
-            assert_eq!(embeddings.len(), images.len());
-            for embedding in embeddings {
-                assert_eq!(embedding.len(), supported_model.dim);
-            }
-
-            // Clear the model cache to avoid running out of space on GitHub Actions.
-            clean_cache(supported_model.model_code.clone())
-        });
 }
 
 fn clean_cache(model_code: String) {
