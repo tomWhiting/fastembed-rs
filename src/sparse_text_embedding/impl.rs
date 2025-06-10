@@ -105,11 +105,11 @@ impl SparseTextEmbedding {
             .expect("Model not found.")
     }
 
-    /// Method to generate sentence embeddings for a Vec of texts
-    // Generic type to accept String, &str, OsString, &OsStr
+    /// Method to generate sentence embeddings for a slice of texts
+    /// Generic type to accept String, &str, OsString, &OsStr
     pub fn embed<S: AsRef<str> + Send + Sync>(
         &self,
-        texts: Vec<S>,
+        texts: &[S],
         batch_size: Option<usize>,
     ) -> Result<Vec<SparseEmbedding>> {
         // Determine the batch size, default if not specified
@@ -119,7 +119,7 @@ impl SparseTextEmbedding {
             .par_chunks(batch_size)
             .map(|batch| {
                 // Encode the texts in the batch
-                let inputs = batch.iter().map(|text| text.as_ref()).collect();
+                let inputs = batch.iter().map(|text| text.as_ref()).collect::<Vec<_>>();
                 let encodings = self.tokenizer.encode_batch(inputs, true).unwrap();
 
                 // Extract the encoding length and batch size

@@ -158,20 +158,19 @@ impl ImageEmbedding {
         Ok(output)
     }
 
-    /// Method to generate image embeddings for a Vec of image path
-    // Generic type to accept String, &str, OsString, &OsStr
+    /// Method to generate image embeddings for a slice of image paths
+    /// Generic type to accept String, &str, OsString, &OsStr
     pub fn embed<S: AsRef<Path> + Send + Sync>(
         &self,
-        images: Vec<S>,
+        images: &[S],
         batch_size: Option<usize>,
     ) -> anyhow::Result<Vec<Embedding>> {
         // Determine the batch size, default if not specified
         let batch_size = batch_size.unwrap_or(DEFAULT_BATCH_SIZE);
-
         let output = images
             .par_chunks(batch_size)
             .map(|batch| {
-                // Encode the texts in the batch
+                // Encode the images in the batch
                 let inputs = batch
                     .iter()
                     .map(|img| {
@@ -180,14 +179,12 @@ impl ImageEmbedding {
                             .map_err(|err| anyhow!("image decode: {}", err))
                     })
                     .collect::<Result<_, _>>()?;
-
                 self.embed_images(inputs)
             })
             .collect::<anyhow::Result<Vec<_>>>()?
             .into_iter()
             .flatten()
             .collect();
-
         Ok(output)
     }
 

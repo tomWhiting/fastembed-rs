@@ -44,7 +44,7 @@
     ];
 
  // Generate embeddings with the default batch size, 256
- let embeddings = model.embed(documents, None)?;
+ let embeddings = model.embed(&documents, None)?;
 
  println!("Embeddings length: {}", embeddings.len()); // -> Embeddings length: 4
  # Ok(())

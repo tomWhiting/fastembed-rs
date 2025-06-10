@@ -118,7 +118,7 @@ macro_rules! create_embeddings_test {
 
                     // Generate embeddings with the default batch size, 256
                     let batch_size = $batch_size;
-                    let embeddings = model.embed(documents.clone(), batch_size);
+                    let embeddings = model.embed(&documents, batch_size);
 
                     if matches!(
                         (batch_size, TextEmbedding::get_quantization_mode(&supported_model.model)),
@@ -184,7 +184,7 @@ fn test_sparse_embeddings() {
             ];
 
             // Generate embeddings with the default batch size, 256
-            let embeddings = model.embed(documents.clone(), None).unwrap();
+            let embeddings = model.embed(&documents, None).unwrap();
 
             assert_eq!(embeddings.len(), documents.len());
             embeddings.into_iter().for_each(|embedding| {
@@ -225,7 +225,7 @@ fn test_user_defined_embedding_model() {
 
     // Find the onnx file - it will be any file ending with .onnx
     let onnx_file = read_file_to_bytes(
-        &model_files_dir
+        model_files_dir
             .read_dir()
             .unwrap()
             .find(|entry| {
@@ -241,22 +241,25 @@ fn test_user_defined_embedding_model() {
             })
             .unwrap()
             .unwrap()
-            .path(),
+            .path()
+            .as_path(),
     )
     .expect("Could not read onnx file");
 
     // Load the tokenizer files
     let tokenizer_files = TokenizerFiles {
-        tokenizer_file: read_file_to_bytes(&model_files_dir.join("tokenizer.json"))
+        tokenizer_file: read_file_to_bytes(model_files_dir.join("tokenizer.json").as_path())
             .expect("Could not read tokenizer.json"),
-        config_file: read_file_to_bytes(&model_files_dir.join("config.json"))
+        config_file: read_file_to_bytes(model_files_dir.join("config.json").as_path())
             .expect("Could not read config.json"),
         special_tokens_map_file: read_file_to_bytes(
-            &model_files_dir.join("special_tokens_map.json"),
+            model_files_dir.join("special_tokens_map.json").as_path(),
         )
         .expect("Could not read special_tokens_map.json"),
-        tokenizer_config_file: read_file_to_bytes(&model_files_dir.join("tokenizer_config.json"))
-            .expect("Could not read tokenizer_config.json"),
+        tokenizer_config_file: read_file_to_bytes(
+            model_files_dir.join("tokenizer_config.json").as_path(),
+        )
+        .expect("Could not read tokenizer_config.json"),
     };
     // Create a UserDefinedEmbeddingModel
     let user_defined_model =
@@ -277,9 +280,7 @@ fn test_user_defined_embedding_model() {
     ];
 
     // Generate embeddings over documents
-    let embeddings = user_defined_text_embedding
-        .embed(documents.clone(), None)
-        .unwrap();
+    let embeddings = user_defined_text_embedding.embed(&documents, None).unwrap();
     assert_eq!(embeddings.len(), documents.len());
     for embedding in embeddings {
         assert_eq!(embedding.len(), test_model_info.dim);
@@ -358,15 +359,16 @@ fn test_user_defined_reranking_large_model() {
 
     // Load the tokenizer files
     let tokenizer_files: TokenizerFiles = TokenizerFiles {
-        tokenizer_file: read_file_to_bytes(&model_repo.get("tokenizer.json").unwrap()).unwrap(),
-        config_file: read_file_to_bytes(&model_repo.get("config.json").unwrap()).unwrap(),
+        tokenizer_file: read_file_to_bytes(model_repo.get("tokenizer.json").unwrap().as_path())
+            .unwrap(),
+        config_file: read_file_to_bytes(model_repo.get("config.json").unwrap().as_path()).unwrap(),
         special_tokens_map_file: read_file_to_bytes(
-            &model_repo.get("special_tokens_map.json").unwrap(),
+            model_repo.get("special_tokens_map.json").unwrap().as_path(),
         )
         .unwrap(),
 
         tokenizer_config_file: read_file_to_bytes(
-            &model_repo.get("tokenizer_config.json").unwrap(),
+            model_repo.get("tokenizer_config.json").unwrap().as_path(),
         )
         .unwrap(),
     };
@@ -417,7 +419,7 @@ fn test_user_defined_reranking_model() {
 
     // Find the onnx file - it will be any file in ./onnx ending with .onnx
     let onnx_file = read_file_to_bytes(
-        &model_files_dir
+        model_files_dir
             .join("onnx")
             .read_dir()
             .unwrap()
@@ -434,22 +436,25 @@ fn test_user_defined_reranking_model() {
             })
             .unwrap()
             .unwrap()
-            .path(),
+            .path()
+            .as_path(),
     )
     .expect("Could not read onnx file");
 
     // Load the tokenizer files
     let tokenizer_files = TokenizerFiles {
-        tokenizer_file: read_file_to_bytes(&model_files_dir.join("tokenizer.json"))
+        tokenizer_file: read_file_to_bytes(model_files_dir.join("tokenizer.json").as_path())
             .expect("Could not read tokenizer.json"),
-        config_file: read_file_to_bytes(&model_files_dir.join("config.json"))
+        config_file: read_file_to_bytes(model_files_dir.join("config.json").as_path())
             .expect("Could not read config.json"),
         special_tokens_map_file: read_file_to_bytes(
-            &model_files_dir.join("special_tokens_map.json"),
+            model_files_dir.join("special_tokens_map.json").as_path(),
         )
         .expect("Could not read special_tokens_map.json"),
-        tokenizer_config_file: read_file_to_bytes(&model_files_dir.join("tokenizer_config.json"))
-            .expect("Could not read tokenizer_config.json"),
+        tokenizer_config_file: read_file_to_bytes(
+            model_files_dir.join("tokenizer_config.json").as_path(),
+        )
+        .expect("Could not read tokenizer_config.json"),
     };
     // Create a UserDefinedEmbeddingModel
     let user_defined_model = UserDefinedRerankingModel::new(onnx_file, tokenizer_files);
@@ -486,7 +491,7 @@ fn test_image_embedding_model() {
         let images = vec!["tests/assets/image_0.png", "tests/assets/image_1.png"];
 
         // Generate embeddings with the default batch size, 256
-        let embeddings = model.embed(images.clone(), None).unwrap();
+        let embeddings = model.embed(&images, None).unwrap();
 
         assert_eq!(embeddings.len(), images.len());
     };
@@ -531,7 +536,7 @@ fn test_nomic_embed_vision_v1_5() {
     // tests/assets/image_0.png is a blue cat
     // tests/assets/image_1.png is a red cat
     let images = vec!["tests/assets/image_0.png", "tests/assets/image_1.png"];
-    let image_embeddings = image_model.embed(images.clone(), None).unwrap();
+    let image_embeddings = image_model.embed(&images, None).unwrap();
     assert_eq!(image_embeddings.len(), images.len());
 
     let text_model = TextEmbedding::try_new(InitOptions::new(
@@ -539,7 +544,7 @@ fn test_nomic_embed_vision_v1_5() {
     ))
     .unwrap();
     let texts = vec!["green cat", "blue cat", "red cat", "yellow cat", "dog"];
-    let text_embeddings = text_model.embed(texts.clone(), None).unwrap();
+    let text_embeddings = text_model.embed(&texts, None).unwrap();
 
     // Generate similarity matrix
     let similarity_matrix = cosine_similarity_matrix(&text_embeddings, &image_embeddings);
@@ -583,11 +588,9 @@ fn test_batch_size_does_not_change_output() {
         "It is absurd to divide people into good and bad. People are either charming or tedious."
     ];
 
-    let single_batch = model
-        .embed(sentences.clone(), None)
-        .expect("create successfully");
+    let single_batch = model.embed(&sentences, None).expect("create successfully");
     let small_batch = model
-        .embed(sentences, Some(3))
+        .embed(&sentences, Some(3))
         .expect("create successfully");
 
     assert_eq!(single_batch.len(), small_batch.len());
@@ -623,7 +626,7 @@ fn test_bgesmallen1point5_match_python_counterpart() {
         6.606_272e-2,
     ];
 
-    let embeddings = model.embed(vec![text], None).expect("create successfully");
+    let embeddings = model.embed(&[text], None).expect("create successfully");
     let tolerance: f32 = 1e-3;
     for (expected, actual) in embeddings[0]
         .clone()
@@ -662,7 +665,7 @@ fn test_allminilml6v2_match_python_counterpart() {
         7.431_366e-2,
     ];
 
-    let embeddings = model.embed(vec![text], None).expect("create successfully");
+    let embeddings = model.embed(&[text], None).expect("create successfully");
     let tolerance: f32 = 1e-6;
     for (expected, actual) in embeddings[0]
         .clone()

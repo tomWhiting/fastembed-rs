@@ -36,11 +36,14 @@ pub struct TokenizerFiles {
 #[cfg(feature = "hf-hub")]
 pub fn load_tokenizer_hf_hub(model_repo: ApiRepo, max_length: usize) -> Result<Tokenizer> {
     let tokenizer_files: TokenizerFiles = TokenizerFiles {
-        tokenizer_file: read_file_to_bytes(&model_repo.get("tokenizer.json")?)?,
-        config_file: read_file_to_bytes(&model_repo.get("config.json")?)?,
-        special_tokens_map_file: read_file_to_bytes(&model_repo.get("special_tokens_map.json")?)?,
-
-        tokenizer_config_file: read_file_to_bytes(&model_repo.get("tokenizer_config.json")?)?,
+        tokenizer_file: read_file_to_bytes(model_repo.get("tokenizer.json")?.as_path())?,
+        config_file: read_file_to_bytes(model_repo.get("config.json")?.as_path())?,
+        special_tokens_map_file: read_file_to_bytes(
+            model_repo.get("special_tokens_map.json")?.as_path(),
+        )?,
+        tokenizer_config_file: read_file_to_bytes(
+            model_repo.get("tokenizer_config.json")?.as_path(),
+        )?,
     };
 
     load_tokenizer(tokenizer_files, max_length)
@@ -143,8 +146,8 @@ pub fn normalize(v: &[f32]) -> Vec<f32> {
 /// Public function to read a file to bytes.
 /// To be used when loading local model files.
 ///
-/// Could be used to read the onnx file from a local cache in order to constitute a UserDefinedEmbeddingModel.
-pub fn read_file_to_bytes(file: &PathBuf) -> Result<Vec<u8>> {
+/// This is a thin wrapper over std::fs::read. Prefer std::fs::read directly unless you need a custom error type.
+pub fn read_file_to_bytes(file: &std::path::Path) -> Result<Vec<u8>> {
     let mut file = File::open(file)?;
     let file_size = file.metadata()?.len() as usize;
     let mut buffer = Vec::with_capacity(file_size);

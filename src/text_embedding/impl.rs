@@ -262,7 +262,7 @@ impl TextEmbedding {
     /// embeddings with your custom output type.
     pub fn transform<'e, 'r, 's, S: AsRef<str> + Send + Sync>(
         &'e self,
-        texts: Vec<S>,
+        texts: &[S],
         batch_size: Option<usize>,
     ) -> Result<EmbeddingOutput<'r, 's>>
     where
@@ -294,7 +294,7 @@ impl TextEmbedding {
 
         let batches = Result::<Vec<_>>::from_par_iter(texts.par_chunks(batch_size).map(|batch| {
             // Encode the texts in the batch
-            let inputs = batch.iter().map(|text| text.as_ref()).collect();
+            let inputs = batch.iter().map(|text| text.as_ref()).collect::<Vec<_>>();
             let encodings = self.tokenizer.encode_batch(inputs, true).map_err(|e| {
                 anyhow::Error::msg(e.to_string()).context("Failed to encode the batch.")
             })?;
@@ -360,9 +360,9 @@ impl TextEmbedding {
         Ok(EmbeddingOutput::new(batches))
     }
 
-    /// Method to generate sentence embeddings for a Vec of texts.
+    /// Method to generate sentence embeddings for a slice of texts.
     ///
-    /// Accepts a [`Vec`] consisting of elements of either [`String`], &[`str`],
+    /// Accepts a slice consisting of elements of either [`String`], &[`str`],
     /// [`std::ffi::OsString`], &[`std::ffi::OsStr`].
     ///
     /// The output is a [`Vec`] of [`Embedding`]s.
@@ -373,7 +373,7 @@ impl TextEmbedding {
     /// the default output precedence and array transformer for the [`TextEmbedding`] model.
     pub fn embed<S: AsRef<str> + Send + Sync>(
         &self,
-        texts: Vec<S>,
+        texts: &[S],
         batch_size: Option<usize>,
     ) -> Result<Vec<Embedding>> {
         let batches = self.transform(texts, batch_size)?;

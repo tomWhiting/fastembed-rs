@@ -101,7 +101,7 @@ let documents = vec![
     ];
 
  // Generate embeddings with the default batch size, 256
- let embeddings = model.embed(documents, None)?;
+ let embeddings = model.embed(&documents, None)?;
 
  println!("Embeddings length: {}", embeddings.len()); // -> Embeddings length: 4
  println!("Embedding dimension: {}", embeddings[0].len()); // -> Embedding dimension: 384
@@ -124,7 +124,7 @@ let model = ImageEmbedding::try_new(
 let images = vec!["assets/image_0.png", "assets/image_1.png"];
 
 // Generate embeddings with the default batch size, 256
-let embeddings = model.embed(images, None)?;
+let embeddings = model.embed(&images, None)?;
 
 println!("Embeddings length: {}", embeddings.len()); // -> Embeddings length: 2
 println!("Embedding dimension: {}", embeddings[0].len()); // -> Embedding dimension: 512
