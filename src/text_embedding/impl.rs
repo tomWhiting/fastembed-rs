@@ -185,8 +185,8 @@ impl TextEmbedding {
             EmbeddingModel::GTELargeENV15Q => Some(Pooling::Cls),
 
             EmbeddingModel::ClipVitB32 => Some(Pooling::Mean),
-
             EmbeddingModel::JinaEmbeddingsV2BaseCode => Some(Pooling::Mean),
+            EmbeddingModel::JinaEmbeddingsV2SmallEn => Some(Pooling::Mean),
         }
     }
 
