@@ -325,7 +325,7 @@ fn init_models_map() -> HashMap<EmbeddingModel, ModelInfo<EmbeddingModel>> {
             dim: 512,
             description: String::from("Jina embeddings v2 small"),
             model_code: String::from("jinaai/jina-embeddings-v2-small-en"),
-            model_file: String::from("onnx/model.onnx"),
+            model_file: String::from("model.onnx"),
             additional_files: Vec::new(),
         },
     ];
